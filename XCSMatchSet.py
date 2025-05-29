@@ -8,9 +8,10 @@ from XCSClassifier import *
 from XCSClassifierSet import *
 
 class XCSMatchSet(XCSClassifierSet):
-    def __init__(self,pop,env,actual_time):
-        XCSClassifierSet.__init__(self,env,actual_time)
+    def __init__(self,pop,state,actual_time):
+        XCSClassifierSet.__init__(self,actual_time)
         self.pop = pop
+        self.state = state
         for cl in self.pop.cls:
             if self.does_match(cl):
                 self.cls.append(cl)
@@ -20,11 +21,11 @@ class XCSMatchSet(XCSClassifierSet):
         while self.num_of_different_actions() < conf.theta_mna:
             cond = []
             clm = XCSClassifier(cond,actual_time)
-            for i in range(len(self.env.state)):
+            for i in range(len(self.state)):
                 if random.random() < conf.p_sharp:
                     cond.append('#')
                 else:
-                    cond.append(self.env.state[i])
+                    cond.append(self.state[i])
             clm.condition = cond
             clm.action = self.random_action()
             clm.experience = 0
@@ -40,10 +41,10 @@ class XCSMatchSet(XCSClassifierSet):
                         self.cls.remove(cl_del)
     def does_match(self,cl):
         """条件部が一致するか"""
-        if len(cl.condition) != len(self.env.state):
+        if len(cl.condition) != len(self.state):
             return False
         for i in range(len(cl.condition)):
-            if cl.condition[i] != '#' and cl.condition[i] != self.env.state[i]:
+            if cl.condition[i] != '#' and cl.condition[i] != self.state[i]:
                 return False
         return True
     def num_of_different_actions(self):

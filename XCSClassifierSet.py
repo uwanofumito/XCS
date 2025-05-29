@@ -7,12 +7,11 @@ from XCSEnvironment import *
 from XCSClassifier import *
 
 class XCSClassifierSet:
-    def __init__(self,env,actual_time):
-        self.env = env
+    def __init__(self,actual_time):
         self.actual_time = actual_time
         self.cls = []
     def deep_copy(self):
-        clset = XCSClassifierSet(self.env,self.actual_time)
+        clset = XCSClassifierSet(self.actual_time)
         clset.cls = self.cls
         return clset
     def accuracy_sum(self):
@@ -36,8 +35,9 @@ class XCSClassifierSet:
         for cl in self.cls:
             vote_sum += cl.deletion_vote(ave_fitness)
             if vote_sum > choice_point:
-                cl.numerosity -= 1
-                if cl.numerosity == 0:
+                if cl.numerosity > 1:
+                    cl.numerosity -= 1
+                else:#if cl.numerosity == 0:
                     self.remove_classifier(i)
                 return cl
             i += 1

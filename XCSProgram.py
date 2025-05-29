@@ -1,6 +1,9 @@
 #!/usr/local/bin python
 # -*- coding:utf-8 -*-
 
+import gym
+import my_mazes
+
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -14,6 +17,11 @@ from XCSClassifierSet import *
 from XCSMatchSet import *
 from XCSActionSet import *
 
+from env_Tmaze import EnvTMaze
+
+SEEDS = [1024, 1032, 1040, 1048, 1056, 1064, 1072, 1080, 1088, 1096, 1104, 1112, 1120, 1128, 1136, 1144, 1152, 1160, 1168, 1176, 1184, 1192, 1200, 1208, 1216, 1224, 1232, 1240, 1248, 1256]
+PROBS = ["maze5", "maze6", "maze7", "mazeB", "mazeD", "mazeF1", "mazeF2", "mazeF3", "mazeF4", "littman89", "woods101"]
+
 class XCSProgram:
     def __init__(self):
         self.env = XCSEnvironment()
@@ -22,23 +30,26 @@ class XCSProgram:
         self.env = XCSEnvironment()
         self.perf = []
     def run_experiments(self):
-        for exp in range(conf.max_experiments):
-            random.seed(exp)
+        for exp,seed in enumerate(SEEDS):
+            self.maze = EnvTMaze(seed, "maze5")#prob)#gym.make("Maze5-v0")
+            #random.seed(seed)
             self.actual_time = 0.0
             self.pop = XCSClassifierSet(self.env,self.actual_time)
             self.init()
             for iteration in range(conf.max_iterations):
-                self.run_explor()
-                self.run_exploit(iteration)
-            print "now" + str(exp)
+                self.state = self.maze.reset()
+                for step in range(conf.max_steps):
+                    self.run_explor()
+                    self.run_exploit(iteration)
+            print("now" + str(exp))
             self.file_writer(exp)
             self.performance_writer(exp)
         self.make_graph()
     def run_explor(self):
         """環境の状態をセット"""
-        self.env.set_state()
+        #self.env.set_state()
         """MatchSet[M]を生成"""
-        self.match_set = XCSMatchSet(self.pop,self.env,self.actual_time)
+        self.match_set = XCSMatchSet(self.pop,self.maze,self.actual_time)
         """MatchSet[M]に基いて,prediction array[PA]を生成"""
         self.generate_prediction_array()
         """prediction array[PA]に基づいて行動選択"""
@@ -168,7 +179,7 @@ class XCSProgram:
                 self.pop.delete_from_population()
     def file_writer(self,num):
         file_name = "population"+str(num)+".csv"
-        write_csv = csv.writer(file(file_name,'w'),lineterminator='\n')
+        write_csv = csv.writer(open(file_name,'w'),lineterminator='\n')
         write_csv.writerow(["condition","action","fitness","prediction","error","numerosity","experience","time_stamp","action_set_size"])
         for cl in self.pop.cls:
             cond = ""

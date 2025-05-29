@@ -11,7 +11,7 @@ class XCSEnvironment:
         self.__length = int(self.__k+math.pow(2,self.__k))
     def set_state(self):
         self.__state = []
-        for i in xrange(self.__length):
+        for i in range(self.__length):
             if random.randrange(2)==0:
                 self.__state.append(0)
             else:
